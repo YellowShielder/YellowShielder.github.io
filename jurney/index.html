@@ -4,12 +4,62 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Jurney: the live test</title>
-<meta http-equiv="refresh" content="1; url=https://ram-nelson-seal-accept.trycloudflare.com/prototype_web/index.html?setup=1">
-<script>location.replace("https://ram-nelson-seal-accept.trycloudflare.com/prototype_web/index.html" + (location.search || "?setup=1") + location.hash);</script>
+<noscript><meta http-equiv="refresh" content="1; url=https://ram-nelson-seal-accept.trycloudflare.com/prototype_web/index.html?setup=1"></noscript>
 <style>:root{color-scheme:dark}body{margin:0;padding:16px;font:16px/1.5 system-ui,sans-serif;background:#10141a;color:#e8ecf1}a{color:#8fd3ff}</style>
 </head>
 <body>
-<p>Opening Jurney&hellip; <a href="https://ram-nelson-seal-accept.trycloudflare.com/prototype_web/index.html?setup=1">tap here if it does not open</a>.</p>
-<p><small>The live test runs on the lab machine; this page always points to it (updated 2026-11-22T22:00Z).</small></p>
+<p id="say">Opening Jurney&hellip;</p>
+<p><a id="go" href="https://ram-nelson-seal-accept.trycloudflare.com/prototype_web/index.html?setup=1">Tap here if it does not open</a>.</p>
+<p><small>The live test runs on the lab machine; this page always points to it (updated 2026-11-22T23:44:47Z).</small></p>
+<script>
+// Ask the lab machine before opening the game (its /presence.json, which any page may read), so a break in its tunnel
+// is waited out here and not on an error page. While it does not answer, read link.json again (a new address, after a
+// restart, is followed) and ask again: every 3 s, after 2 minutes every 15 s.
+(function () {
+  var base = "https://ram-nelson-seal-accept.trycloudflare.com", game = "prototype_web/index.html", rest = (location.search || "?setup=1") + location.hash;
+  var known = Date.parse("2026-11-22T23:44:47Z") || 0;   // when the address asked was published: an older link.json is never followed
+  var slowAfter = 120;                    // seconds of asking every 3 s; every 15 s after
+  var say = document.getElementById("say"), go = document.getElementById("go"), began = Date.now();
+  var moved = false;   // a new address was asked at once already: the next one waits its turn
+  function to(b) { return b + "/" + game + rest; }
+  function ask(url) {   // a fetch, given up after 8 s
+    var stop = typeof AbortController === "function" ? new AbortController() : null;
+    var timer = setTimeout(function () { if (stop) stop.abort(); }, 8000);
+    return fetch(url, { cache: "no-store", signal: stop ? stop.signal : undefined })
+      .then(function (r) { clearTimeout(timer); return r; }, function (e) { clearTimeout(timer); throw e; });
+  }
+  function answers(b) {
+    return ask(b + "/presence.json?t=" + Date.now()).then(function (r) { return r.ok; }, function () { return false; });
+  }
+  // link.json's address if it was published after the one asked, else null. (GitHub's CDN may serve a copy up to 10
+  // minutes old whatever the query, and pages from two moments may meet; the ?t= keeps the browser's own cache out.)
+  function latest() {
+    return ask("link.json?t=" + Date.now())
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        var when = j ? Date.parse(j.updated) : NaN;
+        if (!j || typeof j.base !== "string" || !/^https?:\/\/[^\/?#]+$/.test(j.base) || !(when > known)) return null;
+        known = when;
+        return j.base;
+      }, function () { return null; });
+  }
+  function attempt() {
+    go.href = to(base);
+    answers(base).then(function (ok) {
+      if (ok) { location.replace(to(base)); return; }
+      return latest().then(function (b) {
+        if (b && b !== base) { base = b; if (!moved) { moved = true; attempt(); return; } }
+        moved = false;
+        var s = Math.round((Date.now() - began) / 1000);
+        say.textContent = "The lab machine is not answering yet (" + s + " s). Its tunnel sometimes drops for a few " +
+          "seconds; this page keeps asking and opens the game as soon as it answers." + (s < slowAfter ? "" :
+          " After 5 minutes down the lab machine makes a new tunnel by itself, and this page follows it.");
+        setTimeout(attempt, s < slowAfter ? 3000 : 15000);
+      });
+    });
+  }
+  if (typeof fetch === "function") attempt(); else location.replace(to(base));
+})();
+</script>
 </body>
 </html>
