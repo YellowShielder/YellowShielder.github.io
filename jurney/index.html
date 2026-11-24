@@ -4,20 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Jurney: the live test</title>
-<noscript><meta http-equiv="refresh" content="1; url=https://ram-nelson-seal-accept.trycloudflare.com/prototype_web/index.html?setup=1"></noscript>
+<noscript><meta http-equiv="refresh" content="1; url=https://strategy-knights-mozilla-color.trycloudflare.com/prototype_web/index.html?setup=1"></noscript>
 <style>:root{color-scheme:dark}body{margin:0;padding:16px;font:16px/1.5 system-ui,sans-serif;background:#10141a;color:#e8ecf1}a{color:#8fd3ff}</style>
 </head>
 <body>
 <p id="say">Opening Jurney&hellip;</p>
-<p><a id="go" href="https://ram-nelson-seal-accept.trycloudflare.com/prototype_web/index.html?setup=1">Tap here if it does not open</a>.</p>
-<p><small>The live test runs on the lab machine; this page always points to it (updated 2026-11-22T23:44:47Z).</small></p>
+<p><a id="go" href="https://strategy-knights-mozilla-color.trycloudflare.com/prototype_web/index.html?setup=1">Tap here if it does not open</a>.</p>
+<p><small>The live test runs on the lab machine; this page always points to it (updated 2026-11-24T02:07:23Z).</small></p>
 <script>
 // Ask the lab machine before opening the game (its /presence.json, which any page may read), so a break in its tunnel
 // is waited out here and not on an error page. While it does not answer, read link.json again (a new address, after a
 // restart, is followed) and ask again: every 3 s, after 2 minutes every 15 s.
 (function () {
-  var base = "https://ram-nelson-seal-accept.trycloudflare.com", game = "prototype_web/index.html", rest = (location.search || "?setup=1") + location.hash;
-  var known = Date.parse("2026-11-22T23:44:47Z") || 0;   // when the address asked was published: an older link.json is never followed
+  var base = "https://strategy-knights-mozilla-color.trycloudflare.com", game = "prototype_web/index.html", rest = (location.search || "?setup=1") + location.hash;
+  var known = Date.parse("2026-11-24T02:07:23Z") || 0;   // when the address asked was published: an older link.json is never followed
   var slowAfter = 120;                    // seconds of asking every 3 s; every 15 s after
   var say = document.getElementById("say"), go = document.getElementById("go"), began = Date.now();
   var moved = false;   // a new address was asked at once already: the next one waits its turn
